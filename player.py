@@ -5,7 +5,6 @@ class Player(pygame.sprite.Sprite):
 
     def __init__(self, screen_width, screen_height):
         super().__init__()
-        print("trying to see what happens when update here")
         self.image = pygame.Surface((30,30))
         self.image.fill((255,255,255))
         self.rect = self.image.get_rect(center=(800,800))
