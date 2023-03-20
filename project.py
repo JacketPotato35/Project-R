@@ -14,8 +14,8 @@ display = pygame.display.set_mode((screen_width, screen_height))
 draw_surface=pygame.Surface((2000,2000))
 pygame.display.set_caption('Hello World!')
 
-print("this message is to see if i can update the git version")
-
+print("this message is to see if i can update the git version, so question is what am i doing")
+print("bruh what am i doing")
 player = Player(screen_width, screen_height)
 player_group = pygame.sprite.Group()
 player_group.add(player)
