@@ -92,6 +92,11 @@ class Player(pygame.sprite.Sprite):
                 dot_product * nx
             )
             counter += 0
-    def create_bullet(self,screen_height, screen_width,ctime):
-        if self.bullet_time+300>ctime:
+    def create_bullet(self,screen_height, screen_width):
             return (Bullet(self.bullet_xy[0],self.bullet_xy[1],screen_height, screen_width,self.bullet_xy))
+    def bullet_timer(self,ctime):
+        if self.bullet_time+700<ctime:
+            self.bullet_time=ctime
+            return True
+        else:
+            return False

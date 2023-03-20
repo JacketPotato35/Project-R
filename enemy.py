@@ -23,7 +23,6 @@ class Enemy(pygame.sprite.Sprite):
             self.position+=self.direction*0.5
         if self.time+1>ctime:
             self.randtime=random.randint(-100,300)
-            print(self.randtime)
         if self.time+600+self.randtime>ctime:
             self.position+=self.direction*(7+random.randint(-3,5))
         self.rect.center=self.position
@@ -31,3 +30,4 @@ class Enemy(pygame.sprite.Sprite):
     def check_death(self, bullet_xy):
         if bullet_xy.rect[0]>self.rect.left and bullet_xy.rect[0]<self.rect.right and bullet_xy.rect[1]>self.rect.top and bullet_xy.rect[1]<self.rect.bottom:
             self.kill()
+            return True
