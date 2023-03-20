@@ -55,7 +55,7 @@ while True:
             pygame.quit()
             sys.exit()
         if event.type==pygame.MOUSEBUTTONDOWN:
-            bullet_group.add(player.create_bullet(screen_height, screen_width))
+            bullet_group.add(player.create_bullet(screen_height, screen_width,current_time))
 
     for i in bullet_group:
         for x in enemy_group:

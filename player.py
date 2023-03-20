@@ -11,6 +11,7 @@ class Player(pygame.sprite.Sprite):
         self.bullet_xy=self.rect.center
         self.dash_cd=0
         self.dash_time=0
+        self.bullet_time=-300
     #returns vector direction
     def get_direction(self) -> pygame.math.Vector2:
         direction = pygame.math.Vector2(0, 0)
@@ -91,6 +92,6 @@ class Player(pygame.sprite.Sprite):
                 dot_product * nx
             )
             counter += 0
-    def create_bullet(self,screen_height, screen_width):
-        return (Bullet(self.bullet_xy[0],self.bullet_xy[1],screen_height, screen_width,self.bullet_xy))
-        
+    def create_bullet(self,screen_height, screen_width,ctime):
+        if self.bullet_time+300>ctime:
+            return (Bullet(self.bullet_xy[0],self.bullet_xy[1],screen_height, screen_width,self.bullet_xy))
