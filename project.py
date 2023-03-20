@@ -6,6 +6,7 @@ from wall import Wall
 from background_tile import Background
 from shape import Shape 
 from enemy import Enemy 
+from rooms import room
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -33,18 +34,6 @@ for y in range(0,2000,100):
         background = Background(x,y)
         back.add(background)
 
-room=[
-    ["w","w","w","w","w","w","w","w","w","w","w","w","w","w"],
-    ["w","o","o","o","o","o","o","o","o","o","o","o","o","w"],
-    ["w","o","o","o","o","o","o","o","o","o","o","o","o","w"],
-    ["w","o","o","o","o","o","o","o","o","o","o","o","o","w"],
-    ["w","o","w","o","o","o","o","o","o","o","o","o","o","w"],
-    ["w","o","o","o","o","o","o","o","o","o","o","o","o","w"],
-    ["w","o","o","o","o","o","o","o","o","o","o","o","o","w"],
-    ["w","o","o","o","o","o","o","o","o","o","o","o","o","w"],
-    ["w","o","o","o","o","o","o","o","o","o","o","o","o","w"],
-    ["w","w","w","w","w","w","w","w","w","w","w","w","w","w"]
-]
 roomy=8
 for y in room:
     roomy+=1
