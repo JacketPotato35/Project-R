@@ -16,8 +16,6 @@ class State(Enum):
     game = auto()
 state=State.menu
 
-print("i just wanna check i downloaded the right stuff")
-
 pygame.init()
 clock = pygame.time.Clock()
 screen_width, screen_height = 1000,800
@@ -68,7 +66,7 @@ def game_loop():
                 i.kill()
 
     for i in enemy_group:
-            i.update(player,current_time)    
+            i.update(player,current_time,space)    
             player.check_death(i.rect,current_time)
     draw_surface.fill((30,30,30))
     player_group.update(space,current_time)

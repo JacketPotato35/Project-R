@@ -10,8 +10,6 @@ class Bullet(pygame.sprite.Sprite):
         mouse_pos=pygame.mouse.get_pos()
         self.pointer=pygame.Vector2((-screen_height/2)+mouse_pos[0],-screen_width/2+mouse_pos[1]).normalize()
         print(screen_width/2,screen_height/2)
-        print(mouse_pos)
-        print(self.pointer)
     def update(self,screen_width, screen_height,space):
         for i in space:
             if i.right>self.rect.centerx>i.left and i.bottom>self.rect.centery>i.top:
