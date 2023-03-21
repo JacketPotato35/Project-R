@@ -3,15 +3,20 @@ from bullet import Bullet
 from shape import Shape 
 class Player(pygame.sprite.Sprite):
 
-    def __init__(self, screen_width, screen_height):
+    def __init__(self):
         super().__init__()
         self.image = pygame.Surface((30,30))
         self.image.fill((255,255,255))
-        self.rect = self.image.get_rect(center=(800,800))
+        self.rect = self.image.get_rect(center=(935,810))
         self.bullet_xy=self.rect.center
         self.dash_cd=0
         self.dash_time=0
         self.bullet_time=-300
+        self.lives=3
+        self.livecd=-1000
+        self.blink_duration=0
+        self.blink_time=-100
+        self.blink_state=True
     #returns vector direction
     def get_direction(self) -> pygame.math.Vector2:
         direction = pygame.math.Vector2(0, 0)
@@ -25,7 +30,22 @@ class Player(pygame.sprite.Sprite):
         if keys[pygame.K_d]:
             direction.x += 1
         return direction
-        
+
+    def blink(self,current_time):
+        if self.blink_duration>0:
+            self.blink_duration-=1
+            if self.blink_time+100<current_time:
+                self.blink_time=current_time
+                if self.blink_state==True:
+                    self.image.fill((180,180,180))
+                    self.blink_state=False
+                elif self.blink_state==False:
+                    self.image.fill((255,255,255))
+                    self.blink_state=True
+        else:
+            if self.blink_state==False:
+                self.image.fill((255,255,255))
+                self.blink_state=True
     def dash(self,velocity,current_time):
         keys=pygame.key.get_pressed()
         self.dash_cd+=1
@@ -39,9 +59,15 @@ class Player(pygame.sprite.Sprite):
             return velocity
         return velocity 
         
-    def check_death(self, enemy_rect: pygame.Rect):
-        if self.rect.right>enemy_rect.centerx>self.rect.left and self.rect.bottom>enemy_rect.centery>self.rect.top:
+    def check_death(self, enemy_rect: pygame.Rect, current_time):
+        if self.rect.right>enemy_rect.centerx>self.rect.left and self.rect.bottom>enemy_rect.centery>self.rect.top and self.livecd+500<current_time:
+            self.lives-=1
+            self.livecd=current_time
+            self.blink_duration+=50
+            print("hit")
+        if self.lives==0:
             self.kill()
+        
 
     def update(self,space,current_time):
 
@@ -92,6 +118,9 @@ class Player(pygame.sprite.Sprite):
                 dot_product * nx
             )
             counter += 0
+
+        self.blink(current_time)
+
     def create_bullet(self,screen_height, screen_width):
             return (Bullet(self.bullet_xy[0],self.bullet_xy[1],screen_height, screen_width,self.bullet_xy))
     def bullet_timer(self,ctime):
@@ -100,3 +129,4 @@ class Player(pygame.sprite.Sprite):
             return True
         else:
             return False
+        

@@ -20,7 +20,7 @@ class Enemy(pygame.sprite.Sprite):
             self.time=ctime
         elif vect.length()>250:
             self.direction=vect.normalize()
-            self.position+=self.direction*0.5
+            self.position+=self.direction
         if self.time+1>ctime:
             self.randtime=random.randint(-100,300)
         if self.time+600+self.randtime>ctime:
