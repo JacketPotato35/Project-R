@@ -11,13 +11,24 @@ class Renemy(pygame.sprite.Sprite):
         self.randx=random.randint(-1,1)
         self.randy=random.randint(-1,0) 
         self.time_move=0
+    def pdirection(self,player):
+        sx=self.rect.centerx
+        sy=self.rect.centery
+        px=player.rect.centerx
+        py=player.rect.centery
+        if sx<px and sy<py:
+            return pygame.Vector2(random.randint(0,1),random.randint(0,1))
+        elif sx>px and sy<py:
+            return pygame.Vector2(random.randint(-1,0),random.randint(0,1))
+        elif sx<px and sy>py:
+            return pygame.Vector2(random.randint(0,1),random.randint(-1,0))
+        elif sx>px and sy>py:
+            return pygame.Vector2(random.randint(-1,0),random.randint(-1,0))
+
     def update(self,player, ctime, space):
-        self.direction.x=self.randx
-        self.direction.y=self.randy
         if self.time_move+1500<ctime:
             self.time_move=ctime 
-            self.randx=random.randint(-1,1)
-            self.randy=random.randint(-1,0) 
+            self.direction=self.pdirection(player)
         if self.time_move+750>ctime:
             self.position+=self.direction*3
         self.rect.center=self.position 
