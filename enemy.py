@@ -1,4 +1,5 @@
 import pygame
+import random 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self,x,y):
         super().__init__()
@@ -8,7 +9,7 @@ class Enemy(pygame.sprite.Sprite):
         self.time=0
         self.direction=pygame.Vector2(0,0)
         self.position=pygame.Vector2(x,y)
-
+        self.randtime=0
     def update(self,player_pos, ctime):
         ppos=player_pos.rect
         x_dis=ppos[0]-self.rect.x
@@ -20,10 +21,13 @@ class Enemy(pygame.sprite.Sprite):
         elif vect.length()>250:
             self.direction=vect.normalize()
             self.position+=self.direction*0.5
-        if self.time+500>ctime:
-            self.position+=self.direction*7
+        if self.time+1>ctime:
+            self.randtime=random.randint(-100,300)
+        if self.time+600+self.randtime>ctime:
+            self.position+=self.direction*(7+random.randint(-3,5))
         self.rect.center=self.position
             
     def check_death(self, bullet_xy):
         if bullet_xy.rect[0]>self.rect.left and bullet_xy.rect[0]<self.rect.right and bullet_xy.rect[1]>self.rect.top and bullet_xy.rect[1]<self.rect.bottom:
             self.kill()
+            return True
