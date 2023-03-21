@@ -6,6 +6,9 @@ from wall import Wall
 from background_tile import Background
 from shape import Shape 
 from enemy import Enemy 
+from rooms import room
+
+print("i just wanna check i downloaded the right stuff")
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -33,18 +36,6 @@ for y in range(0,2000,100):
         background = Background(x,y)
         back.add(background)
 
-room=[
-    ["w","w","w","w","w","w","w","w","w","w","w","w","w","w"],
-    ["w","o","o","o","o","o","o","o","o","o","o","o","o","w"],
-    ["w","o","o","o","o","o","o","o","o","o","o","o","o","w"],
-    ["w","o","o","o","o","o","o","o","o","o","o","o","o","w"],
-    ["w","o","w","o","o","o","o","o","o","o","o","o","o","w"],
-    ["w","o","o","o","o","o","o","o","o","o","o","o","o","w"],
-    ["w","o","o","o","o","o","o","o","o","o","o","o","o","w"],
-    ["w","o","o","o","o","o","o","o","o","o","o","o","o","w"],
-    ["w","o","o","o","o","o","o","o","o","o","o","o","o","w"],
-    ["w","w","w","w","w","w","w","w","w","w","w","w","w","w"]
-]
 roomy=8
 for y in room:
     roomy+=1
@@ -58,7 +49,6 @@ for y in room:
             space.append(Shape(walls.rect.left, walls.rect.right, walls.rect.top, walls.rect.bottom))
 
 current_time=0
-
 while True:
     current_time=pygame.time.get_ticks()
     for event in pygame.event.get():
@@ -66,11 +56,13 @@ while True:
             pygame.quit()
             sys.exit()
         if event.type==pygame.MOUSEBUTTONDOWN:
-            bullet_group.add(player.create_bullet(screen_height, screen_width))
+            if player.bullet_timer(current_time):
+                bullet_group.add(player.create_bullet(screen_height, screen_width)) 
 
-    for i in bullet_group:
+    for i in bullet_group: 
         for x in enemy_group:
-            x.check_death(i)
+            if x.check_death(i):
+                i.kill()
 
     for i in enemy_group:
             i.update(player,current_time)    
