@@ -4,12 +4,12 @@ from shape import Shape
 
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y,ctime):
         super().__init__()
         self.image = pygame.Surface((30, 30))
         self.image.fill((155, 60, 30))
         self.rect = self.image.get_rect(center=(x, y))
-        self.time = 0
+        self.time = ctime-500
         self.direction = pygame.Vector2(0, 0)
         self.position = pygame.Vector2(x, y)
         self.randtime = 0

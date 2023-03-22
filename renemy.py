@@ -5,7 +5,7 @@ from enemy_bullet import Enemy_bullet
 
 
 class Renemy(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y,ctime):
         super().__init__()
         self.image = pygame.Surface((30, 30))
         self.image.fill((30, 60, 155))
@@ -15,7 +15,7 @@ class Renemy(pygame.sprite.Sprite):
         self.randx = random.randint(-1, 1)
         self.randy = random.randint(-1, 0)
         self.time_move = 0
-        self.bullet_time = 0
+        self.bullet_time = ctime+500
 
     def pdirection(self, player):
         sx = self.rect.centerx

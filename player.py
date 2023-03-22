@@ -23,6 +23,7 @@ class Player(pygame.sprite.Sprite):
         self.bullet_counter = 6
         self.reloading = False
         self.reload_time = -0
+        self.score=0
     # returns vector direction
 
     def get_direction(self) -> pygame.math.Vector2:
