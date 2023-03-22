@@ -12,7 +12,7 @@ class Enemy(pygame.sprite.Sprite):
         self.position=pygame.Vector2(x,y)
         self.randtime=0
 
-    def update(self,player_pos, ctime,space):
+    def update(self,player_pos,ctime ,space):
         counter=0
         ppos=player_pos.rect
         x_dis=ppos[0]-self.rect.x

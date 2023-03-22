@@ -30,14 +30,16 @@ bullet_group=pygame.sprite.Group()
 back = pygame.sprite.Group()
 wall=pygame.sprite.Group()
 text=Text()
+enemy_bullets=pygame.sprite.Group()
 
 enemy=Enemy(600,600)
 enemy2=Enemy(700,700)
 enemy3=Renemy(500,500)
 enemy_group=pygame.sprite.Group()
+renemy_group=pygame.sprite.Group()
 enemy_group.add(enemy2)
 enemy_group.add(enemy)
-enemy_group.add(enemy3)
+renemy_group.add(enemy3)
 space=[]
 
 for y in range(0,2000,100):
@@ -59,23 +61,41 @@ for y in room:
 
 current_time=0
 button_press=pygame.key
-def game_loop():
-    for i in bullet_group: 
-        for x in enemy_group:
-            if x.check_death(i):
-                i.kill()
 
-    for i in enemy_group:
-            i.update(player,current_time,space)    
-            player.check_death(i.rect,current_time)
-    draw_surface.fill((30,30,30))
-    player_group.update(space,current_time)
-    bullet_group.update(screen_height,screen_width,space)
+def draw_to_surface():
     back.draw(draw_surface)
     wall.draw(draw_surface)
     player_group.draw(draw_surface)
     bullet_group.draw(draw_surface)
     enemy_group.draw(draw_surface)
+    enemy_bullets.draw(draw_surface)
+    renemy_group.draw(draw_surface)
+
+def game_loop():
+    for i in bullet_group: 
+        for x in enemy_group:
+            if x.check_death(i):
+                i.kill()
+        for x in renemy_group:
+            if x.check_death(i):
+                i.kill()
+
+    for i in enemy_group:
+            i.update(player,current_time ,space)    
+            player.check_death(i.rect,current_time)
+    for i in enemy_bullets:
+        player.check_death(i.rect,current_time)
+    for i in renemy_group:
+            i.update(player,current_time,space)
+            player.check_death(i.rect,current_time)
+            if i.enemyb_timer(current_time):
+                enemy_bullets.add(enemy3.create_ebullet(player))
+                
+    draw_surface.fill((30,30,30))
+    player_group.update(space,current_time)
+    bullet_group.update(screen_height,screen_width,space)
+    enemy_bullets.update(space)
+    draw_to_surface()
     display.blit(draw_surface, (-player.rect.x+(screen_width/2), -player.rect.y+(screen_height/2)))
     text.render(display,("lives:"+str(player.lives)),60,20,30)
 def menu():

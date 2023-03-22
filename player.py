@@ -37,7 +37,7 @@ class Player(pygame.sprite.Sprite):
             if self.blink_time+100<current_time:
                 self.blink_time=current_time
                 if self.blink_state==True:
-                    self.image.fill((180,180,180))
+                    self.image.fill((180,160,160))
                     self.blink_state=False
                 elif self.blink_state==False:
                     self.image.fill((255,255,255))
