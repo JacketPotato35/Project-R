@@ -21,6 +21,7 @@ clock = pygame.time.Clock()
 screen_width, screen_height = 1000,800
 display = pygame.display.set_mode((screen_width, screen_height))
 draw_surface=pygame.Surface((2000,2000))
+draw_surface.fill((160,160,160))
 pygame.display.set_caption('Hello World!')
 
 player = Player()
@@ -41,11 +42,6 @@ enemy_group.add(enemy2)
 enemy_group.add(enemy)
 renemy_group.add(enemy3)
 space=[]
-
-for y in range(0,2000,100):
-    for x in range(0, 2000, 100):
-        background = Background(x,y)
-        back.add(background)
 
 roomy=8
 for y in room:
@@ -91,15 +87,17 @@ def game_loop():
             if i.enemyb_timer(current_time):
                 enemy_bullets.add(enemy3.create_ebullet(player))
                 
-    draw_surface.fill((30,30,30))
+    draw_surface.fill((160,160,160))
     player_group.update(space,current_time)
     bullet_group.update(screen_height,screen_width,space)
     enemy_bullets.update(space)
     draw_to_surface()
     display.blit(draw_surface, (-player.rect.x+(screen_width/2), -player.rect.y+(screen_height/2)))
-    text.render(display,("lives:"+str(player.lives)),60,20,30)
+    text.render(display,("lives:"+str(player.lives)),60,20,30, (30,30,30))
+    player.reload_text(display,current_time)
+    
 def menu():
-    text.render( display, "press space to play",screen_width/2,screen_height/2,20)
+    text.render( display, "press space to play",screen_width/2,screen_height/2,20,(255,255,255))
     if button_press==pygame.K_SPACE:
         return(True)
 
@@ -108,7 +106,7 @@ while True:
     for event in pygame.event.get():
         if event.type == QUIT:
             pygame.quit()
-            sys.exit()
+            sys.exit() 
         if event.type == pygame.KEYUP:
             button_press = event.key
         if event.type==pygame.MOUSEBUTTONDOWN:

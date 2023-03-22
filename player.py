@@ -1,6 +1,7 @@
 import pygame
 from bullet import Bullet
 from shape import Shape 
+from text import Text
 class Player(pygame.sprite.Sprite):
 
     def __init__(self):
@@ -17,6 +18,9 @@ class Player(pygame.sprite.Sprite):
         self.blink_duration=0
         self.blink_time=-100
         self.blink_state=True
+        self.bullet_counter=6
+        self.reloading=False
+        self.reload_time=-0
     #returns vector direction
     def get_direction(self) -> pygame.math.Vector2:
         direction = pygame.math.Vector2(0, 0)
@@ -64,7 +68,6 @@ class Player(pygame.sprite.Sprite):
             self.lives-=1
             self.livecd=current_time
             self.blink_duration+=50
-            print("hit")
         if self.lives==0:
             self.kill()
         
@@ -124,9 +127,27 @@ class Player(pygame.sprite.Sprite):
     def create_bullet(self,screen_height, screen_width):
             return (Bullet(self.bullet_xy[0],self.bullet_xy[1],screen_height, screen_width,self.bullet_xy))
     def bullet_timer(self,ctime):
-        if self.bullet_time+700<ctime:
-            self.bullet_time=ctime
-            return True
-        else:
-            return False
-        
+
+        if self.bullet_counter>0:
+            if self.bullet_time+700<ctime:
+                self.bullet_time=ctime
+                self.bullet_counter-=1
+                return True
+            else:
+                return False
+    def reload_text(self, display,ctime):
+        if self.bullet_counter==0:
+            if self.reloading==False:
+                self.reload_time=ctime
+            self.reloading=True
+
+        if self.reloading:
+            if self.reload_time+2200<ctime:
+                self.reloading=False
+                self.bullet_counter+=6
+        text=Text()
+        if self.reloading==True:
+            text.render(display,"reloading",520,500,20,(45,50,30))
+        elif self.reloading==False:
+            text.render(display,("bullets: "+str(self.bullet_counter)),520,500,20,(45,50,30))
+    
