@@ -73,7 +73,7 @@ class Player(pygame.sprite.Sprite):
             self.lives -= 1
             self.livecd = current_time
             self.blink_duration += 50
-        if self.lives == 0:
+        if self.lives <= 0:
             return True
 
     def update(self, space, current_time):

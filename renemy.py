@@ -15,7 +15,7 @@ class Renemy(pygame.sprite.Sprite):
         self.randx = random.randint(-1, 1)
         self.randy = random.randint(-1, 0)
         self.time_move = 0
-        self.bullet_time = ctime+500
+        self.bullet_time = ctime+400+random.randint(0,2800)
 
     def pdirection(self, player):
         sx = self.rect.centerx

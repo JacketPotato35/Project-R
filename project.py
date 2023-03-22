@@ -89,18 +89,18 @@ def load_new(ctime):
     while len(enemy_group.sprites())+len(renemy_group.sprites())==0:
         for i in range(0,random.randint(0,3)):
             enemyx=random.randint(535,1300) #935
-            enemyy=random.randint(410,1160) ##810
+            enemyy=random.randint(410,1110) ##810
             while 1035>enemyx>835 and 910>enemyy>710:
                 enemyx=random.randint(535,1335) #935
-                enemyy=random.randint(410,1210) ##810
+                enemyy=random.randint(410,1110) ##810
             enemy_group.add(Enemy(enemyx,enemyy,ctime,))
             
         for i in range(0,random.randint(0,3)):
             enemyx=random.randint(535,1300) #935
-            enemyy=random.randint(410,1160) ##810
+            enemyy=random.randint(410,1110) ##810
             while 1035>enemyx>835 and 910>enemyy>710:
                 enemyx=random.randint(535,1335) #935
-                enemyy=random.randint(410,1210) ##810
+                enemyy=random.randint(410,1110) ##810
             renemy_group.add(Renemy(enemyx,enemyy,ctime))
 
 
@@ -181,7 +181,7 @@ def next_level(ctime):
             enemyy=random.randint(410,1160) ##810
             while 1035>enemyx>835 and 910>enemyy>710:
                 enemyx=random.randint(535,1300) #935
-                enemyy=random.randint(410,1160) ##810
+                enemyy=random.randint(410,1110) ##810
             enemy_group.add(Enemy(enemyx,enemyy,ctime))
             
         for i in range(0,random.randint(0,3)):
@@ -189,7 +189,7 @@ def next_level(ctime):
             enemyy=random.randint(410,1160) ##810
             while 1035>enemyx>835 and 910>enemyy>710:
                 enemyx=random.randint(535,1300) #935
-                enemyy=random.randint(410,1160) ##810
+                enemyy=random.randint(410,1110) ##810
             renemy_group.add(Renemy(enemyx,enemyy,ctime))
 
 while True:
