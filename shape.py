@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+
+
 @dataclass
 class Shape:
     left: float
@@ -13,19 +15,18 @@ class Shape:
             and self.top < other.bottom
             and self.bottom > other.top
         )
-    
-    
+
     @staticmethod
-    #left, right, otherleft, other right (can be changed for y axis)
+    # left, right, otherleft, other right (can be changed for y axis)
     def collision_time(smin, smax, velocity, omin, omax):
         dist: float
-        #if its going left or right (negative or positive velocity)
+        # if its going left or right (negative or positive velocity)
         if velocity > 0:
-            dist = omin - smax 
+            dist = omin - smax
         elif velocity < 0:
             dist = omax - smin
         else:
             return float("inf")
-        #velocity=time/distance
+        # velocity=time/distance
         time = (dist / velocity)
         return time if time >= 0 else float("inf")
