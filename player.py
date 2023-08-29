@@ -143,19 +143,20 @@ class Player(pygame.sprite.Sprite):
             else:
                 return False
 
-    def reload_text(self, display, ctime):
+    def reload_text(self, display : pygame.display, ctime):
+        screen_width, screen_height = display.get_size()
         if self.bullet_counter == 0:
             if self.reloading == False:
                 self.reload_time = ctime
             self.reloading = True
 
         if self.reloading:
-            if self.reload_time+2200 < ctime:
+            if self.reload_time+2200 < ctime: 
                 self.reloading = False
                 self.bullet_counter += 6
         text = Text()
         if self.reloading == True:
-            text.render(display, "reloading", 520, 500, 20, (45, 50, 30))
+            text.render(display, "reloading", screen_width/2, screen_height/2+40, 20, (45, 50, 30))
         elif self.reloading == False:
             text.render(display, ("bullets: "+str(self.bullet_counter)),
-                        520, 500, 20, (45, 50, 30))
+                        screen_width/2, screen_height/2+40, 20, (45, 50, 30))

@@ -1,6 +1,7 @@
 import pygame
 import sys
 import random
+from test2 import Terminal 
 from pygame.locals import QUIT
 from dataclasses import dataclass
 from player import Player
@@ -13,7 +14,6 @@ from rooms import room
 from enum import Enum, auto
 from text import Text
 from level_square import Level_square
-
 
 class State(Enum):
     menu = auto()
@@ -28,12 +28,11 @@ state = State.menu
 
 pygame.init()
 clock = pygame.time.Clock()
-screen_width, screen_height = 1000, 800
-display = pygame.display.set_mode((screen_width, screen_height))
+display = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+screen_width, screen_height = display.get_size()
 draw_surface = pygame.Surface((2000, 2000))
 draw_surface.fill((160, 160, 160))
 pygame.display.set_caption('Hello World!')
-
 player = Player()
 player_group = pygame.sprite.Group()
 player_group.add(player)
@@ -72,8 +71,15 @@ def draw_to_surface():
     player_group.draw(draw_surface)
     bullet_group.draw(draw_surface)
     enemy_group.draw(draw_surface)
+    hp=pygame.Surface((10,5))
+    for sprite in enemy_group:
+        draw_surface.blit(sprite.hp_bar.image,(sprite.rect.x,sprite.rect.y))
     enemy_bullets.draw(draw_surface)
     renemy_group.draw(draw_surface)
+    
+
+
+        
 
 def load_new(ctime):
     player.score=0
@@ -103,16 +109,36 @@ def load_new(ctime):
                 enemyy=random.randint(410,1110) ##810
             renemy_group.add(Renemy(enemyx,enemyy,ctime))
 
+def terminal(random):
+    if random==1:
+        screenchange(display)
+        terminal=Terminal()
+        terminal.run(display)
+
+def screenchange(display_return : pygame.surface):
+    display_xy=display_return.get_size()
+    line=pygame.Surface((display_xy[0],3))
+    line.fill((63, 63, 63))
+    for y in range(0,int(round(display_xy[1]/2,0)),3):
+        display.blit(line,(0,int(round(display_xy[1]/2,0))+y))
+        display.blit(line,(0,int(round(display_xy[1]/2,0))-y))
+        pygame.display.update()
+        pygame.time.delay(1)
+    pygame.display.update()
+    pygame.time.delay(400)
+
 
 def game_loop():
     for i in bullet_group:
         for x in enemy_group:
             if x.check_death(i):
-                i.kill() 
+                x.hp_bar.update_hp(-5)
+                terminal(random.randint(1,5))
+                i.kill()
         for x in renemy_group:
             if x.check_death(i):
                 i.kill()
-
+                terminal(random.randint(1,8))
     for i in enemy_group:
         i.update(player, current_time, space)
         player.check_death(i.rect, current_time)
@@ -130,19 +156,19 @@ def game_loop():
     bullet_group.update(screen_height, screen_width, space)
     enemy_bullets.update(space)
     draw_to_surface()
-    display.blit(draw_surface, (-player.rect.x +
+    display.blit(draw_surface, (-player.rect.x-15 +
                  (screen_width/2), -player.rect.y+(screen_height/2)))
     text.render(display, ("lives:"+str(player.lives)),
-                60, 20, 30, (30, 30, 30))
+                screen_width/12,screen_height/20, 30, (30, 30, 30))
     text.render(display, ("score:"+str(player.score)),
-                900, 20, 30, (30, 30, 30))
+                screen_width/12*11,screen_height/20, 30, (30, 30, 30))
     player.reload_text(display, current_time)
     if len(enemy_group.sprites())+len(renemy_group.sprites())==0:
         return "next level"
 
 
 def menu():
-    text.render(display, "press space to play", screen_width /
+    text.render(display, "press space to play", screen_width/
                 2, screen_height/2, 20, (255, 255, 255))
     if button_press == pygame.K_SPACE:
         return (True)
@@ -158,9 +184,9 @@ def wait_level(button_press):
     display.blit(draw_surface, (-player.rect.x +
                  (screen_width/2), -player.rect.y+(screen_height/2)))
     text.render(display, ("lives:"+str(player.lives)),
-                60, 20, 30, (30, 30, 30))
+                screen_width/12,screen_height/20, 30, (30, 30, 30))
     text.render(display, ("score:"+str(player.score)),
-                900, 20, 30, (30, 30, 30))
+                screen_width/12*11,screen_height/20, 30, (30, 30, 30))
     player.reload_text(display, current_time)
     if level_square.player_in(player,display,button_press):
         return "next level"
@@ -224,7 +250,6 @@ while True:
             state=State.next_level
     elif state==State.next_level:
         next_level(current_time)
-        print(player.score)
         state=State.game
     pygame.display.update()
     clock.tick(60)

@@ -3,19 +3,16 @@ import random
 from shape import Shape
 from enemy_bullet import Enemy_bullet
 
+class BaseEnemy(pygame.sprite.Sprite):
+    # have methods here that each enemy would have
+    # for example, drawing health, setting health, etc.
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.hp = 16
+        pass
 
-class Renemy(pygame.sprite.Sprite):
-    def __init__(self, x, y,ctime):
-        super().__init__()
-        self.image = pygame.Surface((30, 30))
-        self.image.fill((30, 60, 155))
-        self.rect = self.image.get_rect(center=(x, y))
-        self.direction = pygame.Vector2(0, 0)
-        self.position = pygame.Vector2(x, y)
-        self.randx = random.randint(-1, 1)
-        self.randy = random.randint(-1, 0)
-        self.time_move = 0
-        self.bullet_time = ctime+400+random.randint(0,2800)
+    def draw_health(self):
+        print(self.hp)
 
     def pdirection(self, player):
         sx = self.rect.centerx
@@ -31,7 +28,32 @@ class Renemy(pygame.sprite.Sprite):
         elif sx >= px and sy >= py:
             return pygame.Vector2(random.randint(-1, 0), random.randint(-1, 0))
 
+class Hp_bar(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        self.image=pygame.Surface((30,5))
+        self.image.fill((0,170,0))
+        self.rect=self.image.get_rect(center=(x,y+25))
+    def update(self,x,y):
+        self.rect.centerx=x
+        self.rect.centery=y
+class Renemy(BaseEnemy):
+    def __init__(self, x, y,ctime):
+        super().__init__()
+        self.hp = 13
+        self.image = pygame.Surface((30, 30))
+        self.image.fill((30, 60, 155))
+        self.rect = self.image.get_rect(center=(x, y))
+        self.direction = pygame.Vector2(0, 0)
+        self.position = pygame.Vector2(x, y)
+        self.randx = random.randint(-1, 1)
+        self.randy = random.randint(-1, 0)
+        self.time_move = 0
+        self.bullet_time = ctime+400+random.randint(0,2800)
+        self.hp=60
+        self.hp_bar=Hp_bar(x,y)
+
     def update(self, player, ctime, space):
+        self.hp_bar.update(self.rect.centerx,self.rect.centery)
         velocity = pygame.Vector2(0, 0)
         counter = 0
         if self.time_move+1500 < ctime:
@@ -87,6 +109,7 @@ class Renemy(pygame.sprite.Sprite):
             counter += 0
         self.position += velocity
         self.rect.center = self.position
+        self.hp_bar.center=((self.rect.centerx,self.rect.centery+25))
 
     def check_death(self, bullet_xy):
         if bullet_xy.rect[0] > self.rect.left and bullet_xy.rect[0] < self.rect.right and bullet_xy.rect[1] > self.rect.top and bullet_xy.rect[1] < self.rect.bottom:

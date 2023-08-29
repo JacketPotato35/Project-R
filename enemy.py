@@ -2,6 +2,23 @@ import pygame
 import random
 from shape import Shape
 
+class HP(pygame.sprite.Sprite):
+    def __init__(self, hp_amount, hp_bar_size):
+        super().__init__()
+        self.image=pygame.Surface((hp_bar_size,5))
+        self.image.fill((0,255,0))
+        self.hp_max=hp_amount
+        self.hp=hp_amount
+        self.hp_bar_size=hp_bar_size
+    def update_hp(self,hp_change):
+        current_hp=self.hp+hp_change
+        if current_hp<0:
+            self.kill()
+        self.hp=current_hp
+        self.image=pygame.Surface(((round(self.hp/self.hp_max))*self.hp_bar_size,5))
+        self.image.fill((0,255,0))
+        print("hp change") 
+
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y,ctime):
@@ -9,6 +26,7 @@ class Enemy(pygame.sprite.Sprite):
         self.image = pygame.Surface((30, 30))
         self.image.fill((155, 60, 30))
         self.rect = self.image.get_rect(center=(x, y))
+        self.hp_bar = HP(10,30)
         self.time = ctime-500
         self.direction = pygame.Vector2(0, 0)
         self.position = pygame.Vector2(x, y)
@@ -79,8 +97,10 @@ class Enemy(pygame.sprite.Sprite):
             counter += 0
         self.position += velocity
         self.rect.center = self.position
+    
 
     def check_death(self, bullet_xy):
         if bullet_xy.rect[0] > self.rect.left and bullet_xy.rect[0] < self.rect.right and bullet_xy.rect[1] > self.rect.top and bullet_xy.rect[1] < self.rect.bottom:
-            self.kill()
+            if self.hp_bar.hp<=0:
+                self.kill()
             return True

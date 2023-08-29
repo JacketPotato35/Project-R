@@ -11,4 +11,4 @@ class Text():
         self.font = pygame.font.SysFont("Verdana", font_size)
         self.text = self.font.render((text), True, colour)
         size = self.font.size(text)
-        display.blit(self.text, (locx-(size[0]*0.5), locy))
+        display.blit(self.text, (locx-(size[0]/2), locy))
