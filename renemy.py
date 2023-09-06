@@ -2,66 +2,31 @@ import pygame
 import random
 from shape import Shape
 from enemy_bullet import Enemy_bullet
+from enemy import BaseEnemy
 
-class BaseEnemy(pygame.sprite.Sprite):
-    # have methods here that each enemy would have
-    # for example, drawing health, setting health, etc.
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.hp = 16
-        pass
-
-    def draw_health(self):
-        print(self.hp)
-
-    def pdirection(self, player):
-        sx = self.rect.centerx
-        sy = self.rect.centery
-        px = player.rect.centerx
-        py = player.rect.centery
-        if sx <= px and sy <= py:
-            return pygame.Vector2(random.randint(0, 1), random.randint(0, 1))
-        elif sx >= px and sy <= py:
-            return pygame.Vector2(random.randint(-1, 0), random.randint(0, 1))
-        elif sx <= px and sy >= py:
-            return pygame.Vector2(random.randint(0, 1), random.randint(-1, 0))
-        elif sx >= px and sy >= py:
-            return pygame.Vector2(random.randint(-1, 0), random.randint(-1, 0))
-
-class Hp_bar(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        self.image=pygame.Surface((30,5))
-        self.image.fill((0,170,0))
-        self.rect=self.image.get_rect(center=(x,y+25))
-    def update(self,x,y):
-        self.rect.centerx=x
-        self.rect.centery=y
 class Renemy(BaseEnemy):
-    def __init__(self, x, y,ctime):
-        super().__init__()
-        self.hp = 13
-        self.image = pygame.Surface((30, 30))
+    def __init__(self,x,y,ctime):
+        super().__init__(x,y,ctime)
         self.image.fill((30, 60, 155))
-        self.rect = self.image.get_rect(center=(x, y))
-        self.direction = pygame.Vector2(0, 0)
-        self.position = pygame.Vector2(x, y)
         self.randx = random.randint(-1, 1)
         self.randy = random.randint(-1, 0)
         self.time_move = 0
         self.bullet_time = ctime+400+random.randint(0,2800)
-        self.hp=60
-        self.hp_bar=Hp_bar(x,y)
 
     def update(self, player, ctime, space):
-        self.hp_bar.update(self.rect.centerx,self.rect.centery)
-        velocity = pygame.Vector2(0, 0)
-        counter = 0
-        if self.time_move+1500 < ctime:
-            self.time_move = ctime
-            self.direction = self.pdirection(player)
-        if self.time_move+750 > ctime:
-            velocity = self.direction*3
-
+        if self.is_hit_timer>0:
+            self.is_hit_timer-=1
+            velocity=self.knockback
+        else:
+            self.hp_bar.update(self.rect.centerx,self.rect.centery)
+            velocity = pygame.Vector2(0, 0)
+            
+            if self.time_move+1500 < ctime:
+                self.time_move = ctime
+                self.direction = self.pdirection(player)
+            if self.time_move+750 > ctime:
+                velocity = self.direction*3
+        counter=0
         # while velocity isnt 0/negligible for a frame
         while velocity.magnitude_squared() > 1 and counter <= 5:
             # range of object which the square can physically interact/collide with
@@ -110,12 +75,22 @@ class Renemy(BaseEnemy):
         self.position += velocity
         self.rect.center = self.position
         self.hp_bar.center=((self.rect.centerx,self.rect.centery+25))
+        
 
-    def check_death(self, bullet_xy):
-        if bullet_xy.rect[0] > self.rect.left and bullet_xy.rect[0] < self.rect.right and bullet_xy.rect[1] > self.rect.top and bullet_xy.rect[1] < self.rect.bottom:
-            self.kill()
-            return True
-
+    def pdirection(self, player):
+        sx = self.rect.centerx
+        sy = self.rect.centery
+        px = player.rect.centerx
+        py = player.rect.centery
+        if sx <= px and sy <= py:
+            return pygame.Vector2(random.randint(0, 1), random.randint(0, 1))
+        elif sx >= px and sy <= py:
+            return pygame.Vector2(random.randint(-1, 0), random.randint(0, 1))
+        elif sx <= px and sy >= py:
+            return pygame.Vector2(random.randint(0, 1), random.randint(-1, 0))
+        elif sx >= px and sy >= py:
+            return pygame.Vector2(random.randint(-1, 0), random.randint(-1, 0))
+        
     def enemyb_timer(self, ctime):
         if self.bullet_time+2800 < ctime:
             self.bullet_time = ctime
@@ -128,3 +103,5 @@ class Renemy(BaseEnemy):
         pointer = pygame.Vector2(x_dis, y_dis)
         pointer = pointer.normalize()
         return (Enemy_bullet(self.rect.centerx, self.rect.centery, pointer))
+        
+

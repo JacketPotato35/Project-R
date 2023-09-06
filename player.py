@@ -3,27 +3,22 @@ from bullet import Bullet
 from shape import Shape
 from text import Text
 
-
-class Player(pygame.sprite.Sprite):
-
+class BasePlayer(pygame.sprite.Sprite):
     def __init__(self):
-        super().__init__()
+        pygame.sprite.Sprite.__init__(self)
         self.image = pygame.Surface((30, 30))
         self.image.fill((255, 255, 255))
         self.rect = self.image.get_rect(center=(935, 810))
         self.bullet_xy = self.rect.center
         self.dash_cd = 0
         self.dash_time = 0
-        self.bullet_time = -300
         self.lives = 3
         self.livecd = -1000
         self.blink_duration = 0
         self.blink_time = -100
         self.blink_state = True
-        self.bullet_counter = 6
-        self.reloading = False
-        self.reload_time = -0
         self.score=0
+        self.player_class="base"
     # returns vector direction
 
     def get_direction(self) -> pygame.math.Vector2:
@@ -76,7 +71,7 @@ class Player(pygame.sprite.Sprite):
         if self.lives <= 0:
             return True
 
-    def update(self, space, current_time):
+    def update(self, space, current_time, draw_surface):
 
         counter = 0
         velocity = self.dash(self.get_direction()*3, current_time)
@@ -129,9 +124,28 @@ class Player(pygame.sprite.Sprite):
             counter += 0
 
         self.blink(current_time)
+        self.draw_to_surface(draw_surface)
+
+    def draw_to_surface(self,draw_surface):
+            draw_surface.blit(self.image,(self.rect.x,self.rect.y))
+
+
+class Gunner(BasePlayer):
+
+    def __init__(self):
+        super().__init__()
+        self.bullet_time = -300
+        self.bullet_counter = 6
+        self.reloading = False
+        self.reload_time = -0
+        self.player_class="gunner"
+    
+    def update(self, space, current_time, draw_surface):
+        super().update(space, current_time, draw_surface)
+        self.reload_text(draw_surface,current_time)
 
     def create_bullet(self, screen_height, screen_width):
-        return (Bullet(self.bullet_xy[0], self.bullet_xy[1], screen_height, screen_width, self.bullet_xy))
+        return (Bullet(self.bullet_xy[0], self.bullet_xy[1], screen_height, screen_width, self.bullet_xy,8,6,5))
 
     def bullet_timer(self, ctime):
 
@@ -153,10 +167,69 @@ class Player(pygame.sprite.Sprite):
         if self.reloading:
             if self.reload_time+2200 < ctime: 
                 self.reloading = False
-                self.bullet_counter += 6
+                self.bullet_counter = 6
+        text = Text()
+        if self.reloading == True:
+            text.render(display, "reloading", self.rect.x+(self.rect.width/2), self.rect.y+40, 20, (45, 50, 30))
+        elif self.reloading == False:
+            text.render(display, ("bullets: "+str(self.bullet_counter)),
+                        self.rect.x+(self.rect.width/2), self.rect.y+40, 20, (45, 50, 30))
+
+    def reload(self,display,ctime):
+        screen_width, screen_height = display.get_size()
+        if self.reloading == False:
+            self.reload_time = ctime
+        self.reloading = True
+
+        if self.reloading:
+            if self.reload_time+2200 < ctime: 
+                self.reloading = False
+                self.bullet_counter = 6
         text = Text()
         if self.reloading == True:
             text.render(display, "reloading", screen_width/2, screen_height/2+40, 20, (45, 50, 30))
         elif self.reloading == False:
             text.render(display, ("bullets: "+str(self.bullet_counter)),
-                        screen_width/2, screen_height/2+40, 20, (45, 50, 30))
+                        screen_width/2, screen_height/2+40, 20, (45, 50, 30)) 
+
+
+class Archer(BasePlayer):
+    def __init__(self):
+        super().__init__()
+        self.charging=False
+        self.charging_time=0
+        self.player_class="archer"
+        self.charge_bar=self.ChargeBar(self.rect)
+
+    def update(self, space, current_time,draw_surface):
+        super().update( space, current_time,draw_surface)
+        if self.charging_time>100:
+            self.charging_time=100
+        self.charge_bar.update(self.rect,self.charging_time)
+        self.charge_bar.draw_to_screen(draw_surface,self.rect,self.charging_time)
+        if self.charging==True:
+            self.charging_time+=1
+
+
+    def create_arrow(self, screen_height, screen_width):
+        if self.charging_time>100:
+            self.charging_time=100
+        bullet_ratio=round(((self.charging_time/100)**2)*2,2)
+        self.charging_time=0
+        self.charging=False
+        return (Bullet(self.bullet_xy[0], self.bullet_xy[1], screen_height, screen_width, self.bullet_xy,round(3+4*bullet_ratio),round(6*bullet_ratio),round(5*bullet_ratio)))
+
+
+    class ChargeBar():
+        def __init__(self,player_rect):
+            self.image = pygame.Surface((5, 30))
+            self.image.fill((255, 0, 0))
+            self.rect = self.image.get_rect(center=(player_rect.x, player_rect.y))
+        def update(self,player_rect,charging_time):
+            self.image=pygame.Surface((5,round(15*((charging_time/100)**2)*2)))
+            self.rect=self.image.get_rect(center=(player_rect.x,player_rect.y))
+        def draw_to_screen(self,draw_surface,player_rect,charging_time):
+
+            draw_surface.blit(self.image,(player_rect.x+player_rect.width+5,player_rect.y+player_rect.height-(round(15*((charging_time/100)**2)*2))))
+
+            
