@@ -192,6 +192,79 @@ class Gunner(BasePlayer):
             text.render(display, ("bullets: "+str(self.bullet_counter)),
                         screen_width/2, screen_height/2+40, 20, (45, 50, 30)) 
 
+class Empty_player(BasePlayer):
+    def __init__(self):
+        super().__init__()
+
+class Knight(BasePlayer):
+    def __init__(self):
+        super().__init__()
+        self.player_class="knight"
+        self.marker_group=pygame.sprite.Group()
+        self.swing=False
+        self.swing_timer_max=50
+        self.swing_timer=1
+        self.swing_current_cooldown=self.swing_timer_max
+        self.swing_cooldown=self.swing_timer_max
+        self.knockback=10
+        self.damage=5
+    def draw_marker(self,draw_surface,swing_timer,swing_timer_max):
+        for x in self.marker_group:
+            self.x.draw_2_surface(self.rect,draw_surface,swing_timer,swing_timer_max)
+
+    def update_marker(self,mouse_pos,screen_width,screen_height):
+        if self.swing_current_cooldown>self.swing_cooldown:
+            self.swing=True
+            self.marker_group.add(self.Marker(mouse_pos,screen_width,screen_height))
+            self.swing_current_cooldown=0
+
+    def update(self, space, current_time,draw_surface):
+        super().update( space, current_time,draw_surface)
+        self.swing_current_cooldown+=1
+        if self.swing==True and self.swing_timer<self.swing_timer_max:
+            self.swing_timer+=1
+        else:
+            for x in self.marker_group:
+                x.kill()
+            self.swing=False
+            self.swing_timer=1
+        self.draw_marker(draw_surface,self.swing_timer,self.swing_timer_max)
+        
+
+    class Marker():
+        def __init__(self,mouse_pos,screen_width,screen_height):
+            self.image = pygame.Surface((25, 25))
+            self.image.fill((255, 0, 0))
+            self.rect1 = "empty"
+            self.rect2 = "empty"
+            self.mouse_pos=mouse_pos
+            center_screen=pygame.Vector2(screen_width,screen_height)
+            pointer=center_screen-mouse_pos
+            self.pointer=pygame.math.Vector2.normalize(-pointer)
+            self.screen_width=screen_width
+            self.screen_height=screen_height
+        def draw_2_surface(self,player_rect, draw_surface,swing_timer,swing_timer_max):
+
+            if self.pointer.x==0:
+                self.pointer.x=0.1
+            normal_gradient=(self.pointer[1]/self.pointer[0])
+            if self.screen_height<=self.mouse_pos[1]:
+                normal=pygame.Vector2(-1,(normal_gradient**-1))
+            elif self.screen_height>self.mouse_pos[1]:
+                normal=pygame.Vector2(1,-(normal_gradient**-1))
+            right_pointer=pygame.math.Vector2.normalize(normal)
+            left_pointer=pygame.math.Vector2.normalize(-normal)
+            if swing_timer<swing_timer_max/2:
+                pointer=pygame.math.Vector2.normalize(self.pointer+(right_pointer*1.5*(1-(swing_timer/(swing_timer_max/2)))))
+            elif swing_timer<swing_timer_max:
+                pointer=pygame.math.Vector2.normalize(self.pointer+(left_pointer*1.5*((swing_timer-(swing_timer_max/2))/(swing_timer_max/2))))
+            else:
+                pointer=self.pointer
+            draw_surface.blit(self.image,(player_rect.x+pointer.x*50,player_rect.y+pointer.y*50))
+            draw_surface.blit(self.image,(player_rect.x+pointer.x*100,player_rect.y+pointer.y*100))
+            self.rect1.center=(player_rect.x+pointer.x*50,player_rect.y+pointer.y*50)
+            self.rect2.center=(player_rect.x+pointer.x*100,player_rect.y+pointer.y*100)
+
 
 class Archer(BasePlayer):
     def __init__(self):

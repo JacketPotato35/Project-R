@@ -16,7 +16,7 @@ class BaseEnemy(pygame.sprite.Sprite):
         self.position = pygame.Vector2(x, y)
         self.is_hit_timer=0
         self.knockback=pygame.Vector2(0,0)
-        
+
     class HP(pygame.sprite.Sprite):
         def __init__(self, hp_amount, hp_bar_size):
             super().__init__()
@@ -39,9 +39,20 @@ class BaseEnemy(pygame.sprite.Sprite):
     
 
     def check_bullet_collision(self, bullet_xy):
+        if self.is_hit_timer>0:
+            return False
         if bullet_xy.rect[0] > self.rect.left and bullet_xy.rect[0] < self.rect.right and bullet_xy.rect[1] > self.rect.top and bullet_xy.rect[1] < self.rect.bottom:
-            self.is_hit_timer=10
+            self.is_hit_timer=70
             return True
+        
+    def check_hit_collision(self,rect):
+        if self.is_hit_timer>0:
+            return False
+        corners=[rect.topleft , rect.topright, rect.bottomleft, rect.bottomright]
+        for corner in corners:
+            if corner[0] > self.rect.left and corner[0] < self.rect.right and corner[1] > self.rect.top and corner[1] < self.rect.bottom:
+                self.is_hit_timer=10
+                return True
         
     def check_death(self):
         if self.hp_bar.hp<=0:

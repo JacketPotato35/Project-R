@@ -4,7 +4,7 @@ import random
 from test2 import Terminal 
 from pygame.locals import QUIT
 from dataclasses import dataclass
-from player import Gunner,Archer
+from player import Gunner,Archer,Knight,Empty_player
 from wall import Wall
 from shape import Shape
 from enemy import Enemy
@@ -32,7 +32,7 @@ screen_width, screen_height = display.get_size()
 draw_surface = pygame.Surface((2000, 2000))
 draw_surface.fill((160, 160, 160))
 pygame.display.set_caption('Hello World!')
-player = Archer()
+player = Gunner()
 bullet_group = pygame.sprite.Group()
 back = pygame.sprite.Group()
 wall = pygame.sprite.Group()
@@ -128,6 +128,13 @@ def game_loop():
                 x.check_death()
                 terminal(random.randint(1,20))
                 i.kill()
+    if player.player_class=="knight":
+        for x in enemy_group:
+            for y in player.marker_group:
+                if x.check_hit_collision(y.rect1) or x.check_hit_collision(y.rect2):
+                    x.apply_knockback(player.knockback,y.pointer)
+                    x.hp_bar.update_hp(-player.damage)
+                    x.check_death()
     for i in enemy_group:
         i.update(player, current_time, space)
         i.draw_to_surface(draw_surface)
@@ -161,13 +168,14 @@ def menu(player):
     text.render(display, "press 2 to play as archer", screen_width/
                 2, screen_height/2+25, 20, (255, 255, 255))
     if button_press == pygame.K_1:
-        player=Gunner()
         game_loop()
-        return True
+        return "gunner"
     if button_press== pygame.K_2:
-        player=Archer()
         game_loop()
-        return (True)
+        return "archer"
+    if button_press== pygame.K_3:
+        game_loop()
+        return "knight"
 
 def wait_level(button_press):
 
@@ -228,15 +236,24 @@ while True:
             if player.player_class=="archer":
                 if player.charging==False:
                     player.charging=True
+            if player.player_class=="knight":
+                mouse_pos=pygame.mouse.get_pos()
+                player.update_marker(mouse_pos,screen_width/2,screen_height/2)
         if event.type==pygame.MOUSEBUTTONUP:
             if player.player_class=="archer":
                 if player.charging==True:
                     bullet_group.add(player.create_arrow(screen_height,screen_width))
                     
     if state == State.menu:
-        if menu(player):
-            button_press=""
+        if menu(player)=="gunner":
+            player=Gunner()
             state = State.new_load
+        elif menu(player)=="archer":
+            player=Archer()
+            state = State.new_load
+        elif menu(player)=="knight":
+            player=Knight()
+            state=State.new_load
     elif state == State.game:
         game_loop_return=game_loop()
         if game_loop_return== "dead":
