@@ -16,6 +16,12 @@ class BaseEnemy(pygame.sprite.Sprite):
         self.position = pygame.Vector2(x, y)
         self.is_hit_timer=0
         self.knockback=pygame.Vector2(0,0)
+        if random.randint(4,5)==4:
+            self.hacked=True
+        else:
+            self.hacked=False
+        self.particle_group=pygame.sprite.Group()
+        self.random_particle_add=random.randint(1,10)
 
     class HP(pygame.sprite.Sprite):
         def __init__(self, hp_amount, hp_bar_size):
@@ -42,7 +48,7 @@ class BaseEnemy(pygame.sprite.Sprite):
         if self.is_hit_timer>0:
             return False
         if bullet_xy.rect[0] > self.rect.left and bullet_xy.rect[0] < self.rect.right and bullet_xy.rect[1] > self.rect.top and bullet_xy.rect[1] < self.rect.bottom:
-            self.is_hit_timer=70
+            self.is_hit_timer=10
             return True
         
     def check_hit_collision(self,rect):
@@ -51,16 +57,28 @@ class BaseEnemy(pygame.sprite.Sprite):
         corners=[rect.topleft , rect.topright, rect.bottomleft, rect.bottomright]
         for corner in corners:
             if corner[0] > self.rect.left and corner[0] < self.rect.right and corner[1] > self.rect.top and corner[1] < self.rect.bottom:
-                self.is_hit_timer=10
+                self.is_hit_timer=13
                 return True
         
     def check_death(self):
         if self.hp_bar.hp<=0:
             self.kill()
+            return "dead"
     
     def apply_knockback(self, knockback,bullet_direction):
             self.knockback=bullet_direction*knockback
 
+    class Hacked_effect(pygame.sprite.Sprite):
+        def __init__(self):
+            pygame.sprite.Sprite.__init__(self)
+            self.image = pygame.Surface((random.randint(20,30), random.randint(1,3)))
+            self.image.fill((255, 255, 255))
+            self.time_to_live=random.randint(1,10)
+            self.off_set=[random.randint(-10,10),random.randint(-2,32)]
+        def update(self):
+            self.time_to_live-=1
+            if self.time_to_live<=0:
+                self.kill()
 
     
 class Enemy(BaseEnemy):
@@ -70,6 +88,13 @@ class Enemy(BaseEnemy):
         self.time = ctime-500
         self.randtime=0
     def update(self, player_pos, ctime, space):
+            self.particle_group.update()
+            if self.hacked==True:
+                if self.random_particle_add<=0:
+                    for i in range(random.randint(0,3)):
+                        self.particle_group.add(self.Hacked_effect())
+                self.random_particle_add-=1
+            
             if self.is_hit_timer>0:
                 self.is_hit_timer-=1
                 velocity=self.knockback

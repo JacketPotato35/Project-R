@@ -20,6 +20,7 @@ class State(Enum):
     new_load = auto()
     wait_level=auto()
     next_level=auto()
+    buff_choose=auto()
 
 
 
@@ -43,6 +44,7 @@ lsquareg=pygame.sprite.Group()
 lsquareg.add(level_square)
 enemy_group = pygame.sprite.Group()
 space = []
+buffs_chosen=[]
 
 roomy = 8
 for y in room:
@@ -60,6 +62,43 @@ for y in room:
 current_time = 0
 button_press = pygame.key
 
+array_class_buffs=[
+    [
+        ["player.bullet_counter+=1","increase bullet count by 1"],
+        ["player.fire_rate=round(player.fire_rate/3*2)","decrease fire rate by a third"],
+        ["player.bullet_speed+=2","increase bullet speed"],
+        ["player.knockback+=1","increase knockback"],
+        ["player.damage+=1","increase damage"]
+    ],
+    [
+        ["player.arrow_speed+=2","increase arrow speed"],
+        ["player.damage+=2","increase arrow damage"],
+        ["player.knockback+=1","increase arrow knockback"],
+        ["player.charge_time=round(player.charge_time/4*3)","decrease charge time by 25%"]
+    ],
+    [
+        ["player.damage+=2","increase swing damage"],
+        ["player.knockback+=1","increase knockback"],
+        ["player.sword_length+=10","increase sword length"],
+        ["player.swing_distance+=0.1","increase swing distance"],
+        ["player.swing_timer_max=player.swing_timer_max/7*6","increase swing speed"]
+
+    ]
+]
+
+array_of_buffs=[
+    ["player.hp_bar.current_hp+=round(player.hp_bar.hp_max/5)","player restores 20%"+ "of hp"],
+    ["player.hp_bar.current_hp+=round(player.hp_bar.hp_max*2/5)","player restores 40%"+ "of hp"],
+    ["player.hp_bar.hp_max+=30","increase max hp for 30"],
+    ["player.hp_bar.hp_max+=50","increase max hp for 50"],
+    ["player.invincibility_time+=750","after being hit gain 0.75 of additional invincibility"],
+    ["player.dash_reactivation_cd=round(player.daash_reactivation_cd/2)","half the cooldown of dashing"],
+    ["player.kill_heal+=3","after killing an enemy heal for 3 hp (stacks)"]
+
+                ]
+
+
+
 def draw_to_surface():
     back.draw(draw_surface)
     wall.draw(draw_surface)
@@ -67,8 +106,6 @@ def draw_to_surface():
     enemy_bullets.draw(draw_surface)
     
 
-
-        
 
 def load_new(ctime):
     player.score=0
@@ -97,12 +134,50 @@ def load_new(ctime):
                 enemyy=random.randint(410,1110) ##810
             enemy_group.add(Renemy(enemyx,enemyy,ctime))
 
-def terminal(random):
-    if random==1:
-        screenchange(display)
-        terminal=Terminal()
-        terminal.run(display)
+def terminal():
+    screenchange(display)
+    terminal=Terminal()
+    terminal.run(display)
+    screenchange(display)
+    choice1=get_random_buff()
+    choice2=get_random_buff()
+    choice3=get_random_buff()
+    return "buff_choose"
 
+def buff_choose(buffs_chosen):
+    choice1=buffs_chosen[0] 
+    choice2=buffs_chosen[1] 
+    choice3=buffs_chosen[2] 
+    text.render(display, "press 1 for: "+choice1[1], screen_width/
+                2, screen_height/2-50, 20, (255, 255, 255))
+    text.render(display, "press 2 for: "+choice2[1], screen_width/
+                2, screen_height/2, 20, (255, 255, 255))
+    text.render(display, "press 3 for:  "+choice3[1], screen_width/
+                2, screen_height/2+50, 20, (255, 255, 255))
+    if button_press == pygame.K_1:
+        exec(choice1[0])
+        return "finished"
+    if button_press == pygame.K_2:
+        exec(choice2[0])
+        return "finished" 
+    if button_press == pygame.K_3:
+        exec(choice3[0])
+        return "finished"
+
+
+def get_random_buff():
+    type=random.randint(0,1)
+    if type==0:
+        return array_of_buffs[random.randint(0,len(array_of_buffs)-1)]
+    elif type==1:
+        if player.player_class=="gunner":
+            pclass=0
+        elif player.player_class=="archer":
+            pclass=1
+        elif player.player_class=="knight":
+            pclass=2
+        return array_class_buffs[pclass][random.randint(0,len(array_class_buffs[pclass])-1)]
+    
 def screenchange(display_return : pygame.surface):
     display_xy=display_return.get_size()
     line=pygame.Surface((display_xy[0],3))
@@ -125,20 +200,27 @@ def game_loop():
             if x.check_bullet_collision(i):
                 x.apply_knockback(i.knockback,i.pointer)
                 x.hp_bar.update_hp(-i.damage)
-                x.check_death()
-                terminal(random.randint(1,20))
-                i.kill()
+                if x.check_death():
+                    player.hp_bar.current_hp+=player.kill_heal
+                    if x.hacked==True:
+                        return terminal()
     if player.player_class=="knight":
         for x in enemy_group:
             for y in player.marker_group:
-                if x.check_hit_collision(y.rect1) or x.check_hit_collision(y.rect2):
+                if x.check_hit_collision(y.rect1) or x.check_hit_collision(y.rect2) or x.check_hit_collision(y.rect3) or x.check_hit_collision(y.rect4):
                     x.apply_knockback(player.knockback,y.pointer)
                     x.hp_bar.update_hp(-player.damage)
-                    x.check_death()
+                if x.check_death():
+                    player.hp_bar.current_hp+=player.kill_heal
+                    if x.hacked==True:
+                        return terminal()
     for i in enemy_group:
         i.update(player, current_time, space)
         i.draw_to_surface(draw_surface)
-        player.check_death(i.rect, current_time)
+        if player.check_death(i.rect, current_time):
+            return "dead"
+        for x in i.particle_group:
+            draw_surface.blit(x.image,(i.rect.x+x.off_set[0],i.rect.y+x.off_set[1]))
     for i in enemy_bullets:
         if player.check_death(i.rect, current_time):
             return "dead"
@@ -154,8 +236,9 @@ def game_loop():
     draw_to_surface()
     display.blit(draw_surface, (-player.rect.x-15 +
                  (screen_width/2), -player.rect.y+(screen_height/2)))
-    text.render(display, ("lives:"+str(player.lives)),
-                screen_width/12,screen_height/20, 30, (30, 30, 30))
+    display.blit(player.hp_bar.image,((15),(15)))
+    text.render(display, (str(player.hp_bar.current_hp)+"/"+str(player.hp_bar.hp_max)),
+                screen_width/10,40, 30, (30, 30, 30))
     text.render(display, ("score:"+str(player.score)),
                 screen_width/12*11,screen_height/20, 30, (30, 30, 30))
     if len(enemy_group.sprites())==0:
@@ -167,6 +250,8 @@ def menu(player):
                 2, screen_height/2, 20, (255, 255, 255))
     text.render(display, "press 2 to play as archer", screen_width/
                 2, screen_height/2+25, 20, (255, 255, 255))
+    text.render(display, "press 3 to play as knight", screen_width/
+                2, screen_height/2+50, 20, (255, 255, 255))
     if button_press == pygame.K_1:
         game_loop()
         return "gunner"
@@ -187,8 +272,9 @@ def wait_level(button_press):
     draw_to_surface()
     display.blit(draw_surface, (-player.rect.x +
                  (screen_width/2), -player.rect.y+(screen_height/2)))
-    text.render(display, ("lives:"+str(player.lives)),
-                screen_width/12,screen_height/20, 30, (30, 30, 30))
+    display.blit(player.hp_bar.image,((15),(15)))
+    text.render(display, (str(player.hp_bar.current_hp)+"/"+str(player.hp_bar.hp_max)),
+                screen_width/10,40, 30, (30, 30, 30))
     text.render(display, ("score:"+str(player.score)),
                 screen_width/12*11,screen_height/20, 30, (30, 30, 30))
     if level_square.player_in(player,display,button_press):
@@ -260,6 +346,12 @@ while True:
             state = State.menu
         if game_loop_return== "next level":
             state=State.wait_level
+        if game_loop_return== "buff_choose":
+            state=State.buff_choose
+            buffs_chosen=[get_random_buff(),get_random_buff(),get_random_buff()]
+    elif state== State.buff_choose:
+        if buff_choose(buffs_chosen)=="finished":
+            state=State.game
     elif state== State.new_load:
         load_new(current_time)
         state=State.game
