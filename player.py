@@ -84,7 +84,7 @@ class BasePlayer(pygame.sprite.Sprite):
 
     def check_death(self, enemy_rect: pygame.Rect, current_time):
         if self.rect.right > enemy_rect.centerx > self.rect.left and self.rect.bottom > enemy_rect.centery > self.rect.top and self.livecd+self.invincibility_time < current_time:
-            self.hp_bar.update_hp(-5)
+            self.hp_bar.update_hp(-15)
             self.livecd = current_time
             self.blink_duration += 50
         if self.hp_bar.current_hp <= 0:
@@ -158,7 +158,7 @@ class Gunner(BasePlayer):
         self.reloading = False
         self.reload_time = -0
         self.player_class="gunner"
-        self.knockback=5
+        self.knockback=3
         self.damage=5
         self.bullet_speed=6
         self.fire_rate=800

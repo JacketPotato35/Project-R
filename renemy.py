@@ -15,6 +15,8 @@ class Renemy(BaseEnemy):
 
     def update(self, player, ctime, space):
         self.particle_group.update()
+        if self.invincibility_timer>0:
+            self.invincibility_timer-=1
         if self.hacked==True:
                 if self.random_particle_add<=0:
                     for i in range(random.randint(0,3)):

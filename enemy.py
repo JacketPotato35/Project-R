@@ -16,7 +16,8 @@ class BaseEnemy(pygame.sprite.Sprite):
         self.position = pygame.Vector2(x, y)
         self.is_hit_timer=0
         self.knockback=pygame.Vector2(0,0)
-        if random.randint(4,5)==4:
+        self.invincibility_timer=60
+        if random.randint(1,5)==4:
             self.hacked=True
         else:
             self.hacked=False
@@ -45,19 +46,21 @@ class BaseEnemy(pygame.sprite.Sprite):
     
 
     def check_bullet_collision(self, bullet_xy):
-        if self.is_hit_timer>0:
+        if self.invincibility_timer>0:
             return False
         if bullet_xy.rect[0] > self.rect.left and bullet_xy.rect[0] < self.rect.right and bullet_xy.rect[1] > self.rect.top and bullet_xy.rect[1] < self.rect.bottom:
             self.is_hit_timer=10
+            self.invincibility_timer+=60
             return True
         
     def check_hit_collision(self,rect):
-        if self.is_hit_timer>0:
+        if self.invincibility_timer>0:
             return False
         corners=[rect.topleft , rect.topright, rect.bottomleft, rect.bottomright]
         for corner in corners:
             if corner[0] > self.rect.left and corner[0] < self.rect.right and corner[1] > self.rect.top and corner[1] < self.rect.bottom:
                 self.is_hit_timer=13
+                self.invincibility_timer=60
                 return True
         
     def check_death(self):
@@ -89,6 +92,8 @@ class Enemy(BaseEnemy):
         self.randtime=0
     def update(self, player_pos, ctime, space):
             self.particle_group.update()
+            if self.invincibility_timer>0:
+                self.invincibility_timer-=1
             if self.hacked==True:
                 if self.random_particle_add<=0:
                     for i in range(random.randint(0,3)):
