@@ -70,7 +70,6 @@ class Terminal():
         written_code=self.user_text[2:-1]
         code_str = f"def {question.function_name}():"+"\n"
         code_str += "    " + (f"""#{question.comments}""" or "") +"\n"
-        print(question.pre_written_code)
         for line in written_code:
             code_str+=f"""{line}\n"""
         code_str += f"""{question.function_name}()"""
@@ -118,7 +117,6 @@ class Terminal():
             return True
     def return_execute_output(self):   
         code_str=self.convert_2_string(self.question)
-        print(code_str)
         try:
             code_output=exec_with_return(code_str)
             return code_output
@@ -193,7 +191,6 @@ class Terminal():
                             self.user_text[self.user_row]+="    "
                             #run the code
                         elif button_press==pygame.K_ESCAPE:
-                            print(self.return_execute_output())
                             if self.check_process()==True:
                                 return False
                             #clear the code

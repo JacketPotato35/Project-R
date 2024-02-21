@@ -17,7 +17,7 @@ class BaseEnemy(pygame.sprite.Sprite):
         self.is_hit_timer=0
         self.knockback=pygame.Vector2(0,0)
         self.invincibility_timer=60
-        if random.randint(1,5)==4:
+        if random.randint(1,100000)==4:
             self.hacked=True
         else:
             self.hacked=False

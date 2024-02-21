@@ -13,6 +13,7 @@ from rooms import room
 from enum import Enum, auto
 from text import Text
 from level_square import Level_square
+from map import Map
 
 class State(Enum):
     menu = auto() 
@@ -28,8 +29,11 @@ state = State.menu
 
 pygame.init()
 clock = pygame.time.Clock()
-display = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+info=pygame.display.Info()
+display = pygame.display.set_mode((info.current_w*2,info.current_h*2), pygame.FULLSCREEN)
 screen_width, screen_height = display.get_size()
+screen_height*=2
+screen_width*=2
 draw_surface = pygame.Surface((2000, 2000))
 draw_surface.fill((160, 160, 160))
 pygame.display.set_caption('Hello World!')
@@ -39,12 +43,18 @@ back = pygame.sprite.Group()
 wall = pygame.sprite.Group()
 text = Text()
 enemy_bullets = pygame.sprite.Group()
-level_square= Level_square()
 lsquareg=pygame.sprite.Group()
-lsquareg.add(level_square)
 enemy_group = pygame.sprite.Group()
 space = []
 buffs_chosen=[]
+cols,rows=(7,7)
+arr = [["o" for i in range(cols)] for j in range(rows)]
+arr[round(cols/2)-1][round(rows/2)-1]="s"
+current_space=[3,3]
+map=Map(arr,current_space)
+room_options=["e","s"]
+
+
 
 roomy = 8
 for y in room:
@@ -92,13 +102,48 @@ array_of_buffs=[
     ["player.hp_bar.hp_max+=30","increase max hp for 30"],
     ["player.hp_bar.hp_max+=50","increase max hp for 50"],
     ["player.invincibility_time+=750","after being hit gain 0.75 of additional invincibility"],
-    ["player.dash_reactivation_cd=round(player.daash_reactivation_cd/2)","half the cooldown of dashing"],
+    ["player.dash_reactivation_cd=round(player.dash_reactivation_cd/2)","half the cooldown of dashing"],
     ["player.kill_heal+=3","after killing an enemy heal for 3 hp (stacks)"]
 
                 ]
 
-
-
+def make_array(rooms,arr):
+    for i in range(rooms):
+        around=[(0,1),(0,-1),(1,0),(-1,0)]
+        while True:    
+            room_count=0
+            for i in arr:
+                for j in i:
+                    if j=="s":
+                        room_count+=1
+            count=random.randint(1,room_count)
+            x,y=0,0
+            stored_num=[x,y]
+            for i in arr:
+                y+=1
+                for j in i:
+                    x+=1
+                    if j=="s":
+                        count-=1
+                    if count==0 and j=="s":
+                        stored_num=[x-1,y-1]
+                x=0
+            count=0
+            for i in around:
+                try:
+                    if arr[stored_num[1]+i[1]][stored_num[0]+i[0]]=="s":
+                        count+=1
+                except:
+                    pass
+            if count<3:
+                try:
+                    adj=[(0,1),(0,-1),(1,0),(-1,0)]
+                    ran_d=adj[random.randint(0,3)]
+                    arr[stored_num[1]+ran_d[0]][stored_num[0]+ran_d[1]]="s"
+                    break
+                except:
+                    pass
+    return arr
 def draw_to_surface():
     back.draw(draw_surface)
     wall.draw(draw_surface)
@@ -234,13 +279,13 @@ def game_loop():
     bullet_group.update(screen_height, screen_width, space)
     enemy_bullets.update(space)
     draw_to_surface()
-    display.blit(draw_surface, (-player.rect.x-15 +
-                 (screen_width/2), -player.rect.y+(screen_height/2)))
+    display.blit(draw_surface, (-player.rect.x +
+                 (screen_width/4), -player.rect.y+(screen_height/4)))
     display.blit(player.hp_bar.image,((15),(15)))
     text.render(display, (str(player.hp_bar.current_hp)+"/"+str(player.hp_bar.hp_max)),
-                screen_width/10,40, 30, (30, 30, 30))
+                150,30, 30, (30, 30, 30))
     text.render(display, ("score:"+str(player.score)),
-                screen_width/12*11,screen_height/20, 30, (30, 30, 30))
+                screen_width/12*11.2,15, 30, (30, 30, 30))
     if len(enemy_group.sprites())==0:
         return "next level"
 
@@ -249,9 +294,9 @@ def menu(player):
     text.render(display, "press 1 to play as gunner", screen_width/
                 2, screen_height/2, 20, (255, 255, 255))
     text.render(display, "press 2 to play as archer", screen_width/
-                2, screen_height/2+25, 20, (255, 255, 255))
-    text.render(display, "press 3 to play as knight", screen_width/
                 2, screen_height/2+50, 20, (255, 255, 255))
+    text.render(display, "press 3 to play as knight", screen_width/
+                2, screen_height/2+100, 20, (255, 255, 255))
     if button_press == pygame.K_1:
         game_loop()
         return "gunner"
@@ -262,8 +307,7 @@ def menu(player):
         game_loop()
         return "knight"
 
-def wait_level(button_press):
-
+def wait_level(button_press,current_space,arr):
     draw_surface.fill((160, 160, 160))
     player.update(space, current_time, draw_surface)
     bullet_group.update(screen_height, screen_width, space)
@@ -271,16 +315,34 @@ def wait_level(button_press):
     lsquareg.draw(draw_surface)
     draw_to_surface()
     display.blit(draw_surface, (-player.rect.x +
-                 (screen_width/2), -player.rect.y+(screen_height/2)))
+                 (screen_width/4), -player.rect.y+(screen_height/4)))
     display.blit(player.hp_bar.image,((15),(15)))
     text.render(display, (str(player.hp_bar.current_hp)+"/"+str(player.hp_bar.hp_max)),
                 screen_width/10,40, 30, (30, 30, 30))
     text.render(display, ("score:"+str(player.score)),
                 screen_width/12*11,screen_height/20, 30, (30, 30, 30))
-    if level_square.player_in(player,display,button_press):
-        return "next level"
+    map.draw_grid(display)
+    for lsquare in lsquareg:
+
+        if lsquare.player_in(player,display,button_press):
+            current_space[0]+=lsquare.direction[1]
+            current_space[1]+=lsquare.direction[0]
+            temp_arr=arr
+            temp_arr[current_space[0]][current_space[1]]="c"
+            #print(f"""{temp_arr[current_space[0]+1][current_space[1]]}\n
+          #{arr[current_space[0]-1][current_space[1]]}\n
+          #{arr[current_space[0]][current_space[1]+1]}\n
+          #{arr[current_space[0]][current_space[1]-1]}""")
+            #for i in temp_arr: 
+            #    print (i)
+            #print("///////")
+            for i in lsquareg:
+                i.kill()
+            map.update(arr,current_space)
+            return "next level"
+            
         
-def next_level(ctime):
+def next_level(ctime,arr,current_space):
     player.rect.center=(935,810)
     player.bullet_counter=6
     player.score+=1
@@ -288,24 +350,27 @@ def next_level(ctime):
     enemy_group.empty()
     enemy_bullets.empty()
     bullet_group.empty()
-
-    while len(enemy_group.sprites())==0:
-        for i in range(0,random.randint(0,3)):
-            enemyx=random.randint(535,1300) #935 
-            enemyy=random.randint(410,1160) ##810
-            while 1035>enemyx>835 and 910>enemyy>710:
+    if arr[current_space[1]][current_space[0]]=="s":
+        while len(enemy_group.sprites())==0:
+            for i in range(0,random.randint(0,3)):
+                enemyx=random.randint(535,1300) #935 
+                enemyy=random.randint(410,1160) ##810
+                while 1035>enemyx>835 and 910>enemyy>710:
+                    enemyx=random.randint(535,1300) #935
+                    enemyy=random.randint(410,1110) ##810
+                enemy_group.add(Enemy(enemyx,enemyy,ctime))
+                
+            for i in range(0,random.randint(0,3)):
                 enemyx=random.randint(535,1300) #935
-                enemyy=random.randint(410,1110) ##810
-            enemy_group.add(Enemy(enemyx,enemyy,ctime))
-            
-        for i in range(0,random.randint(0,3)):
-            enemyx=random.randint(535,1300) #935
-            enemyy=random.randint(410,1160) ##810
-            while 1035>enemyx>835 and 910>enemyy>710:
-                enemyx=random.randint(535,1300) #935
-                enemyy=random.randint(410,1110) ##810
-            enemy_group.add(Renemy(enemyx,enemyy,ctime))
-
+                enemyy=random.randint(410,1160) ##810
+                while 1035>enemyx>835 and 910>enemyy>710:
+                    enemyx=random.randint(535,1300) #935
+                    enemyy=random.randint(410,1110) ##810
+                enemy_group.add(Renemy(enemyx,enemyy,ctime))
+arr=make_array(15,arr)
+for i in arr:
+    print(i)
+print("///////")
 while True:
     current_time = pygame.time.get_ticks()
     for event in pygame.event.get():
@@ -318,17 +383,18 @@ while True:
             if player.player_class=="gunner":
                 if player.bullet_timer(current_time):
                     bullet_group.add(player.create_bullet(
-                        screen_height, screen_width))
+                        screen_height/2, screen_width/2))
             if player.player_class=="archer":
                 if player.charging==False:
                     player.charging=True
             if player.player_class=="knight":
                 mouse_pos=pygame.mouse.get_pos()
+                mouse_pos=(mouse_pos[0]*2,mouse_pos[1]*2)
                 player.update_marker(mouse_pos,screen_width/2,screen_height/2)
         if event.type==pygame.MOUSEBUTTONUP:
             if player.player_class=="archer":
                 if player.charging==True:
-                    bullet_group.add(player.create_arrow(screen_height,screen_width))
+                    bullet_group.add(player.create_arrow(screen_height/2,screen_width/2))
                     
     if state == State.menu:
         if menu(player)=="gunner":
@@ -346,6 +412,20 @@ while True:
             state = State.menu
         if game_loop_return== "next level":
             state=State.wait_level
+            if arr[current_space[1]+1%7][current_space[0]%7] in room_options:
+                level_square= Level_square(0,100,[1,0])
+                lsquareg.add(level_square)
+            if arr[current_space[1]-1%7][current_space[0]%7] in room_options:
+                level_square= Level_square(0,-100,[-1,0])
+                lsquareg.add(level_square)
+            if arr[current_space[1]%7][current_space[0]+1%7] in room_options:
+                level_square= Level_square(100,0,[0,1])
+                lsquareg.add(level_square)
+            if arr[current_space[1]%7][current_space[0]-1%7] in room_options:
+                level_square= Level_square(-100,0,[0,-1])
+                lsquareg.add(level_square)
+            for i in arr:
+                print(i)
         if game_loop_return== "buff_choose":
             state=State.buff_choose
             buffs_chosen=[get_random_buff(),get_random_buff(),get_random_buff()]
@@ -356,12 +436,13 @@ while True:
         load_new(current_time)
         state=State.game
     elif state==State.wait_level:
-        wait=wait_status=wait_level(button_press)
+        wait=wait_status=wait_level(button_press,current_space,arr)
         button_press=""
         if wait=="next level":
             state=State.next_level
     elif state==State.next_level:
-        next_level(current_time)
+        next_level(current_time,arr,current_space)
+        arr[current_space[1]][current_space[0]]="e"
         state=State.game
     pygame.display.update()
     clock.tick(60)

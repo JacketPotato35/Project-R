@@ -12,7 +12,7 @@ class BasePlayer(pygame.sprite.Sprite):
         self.bullet_xy = self.rect.center
         self.dash_cd = 0
         self.dash_time = 0
-        self.hp_bar=self.Hp_bar(100)
+        self.hp_bar=self.Hp_bar(100000)
         self.livecd = -1000
         self.blink_duration = 0
         self.blink_time = -100
@@ -192,10 +192,10 @@ class Gunner(BasePlayer):
                 self.bullet_counter = 6
         text = Text()
         if self.reloading == True:
-            text.render(display, "reloading", self.rect.x+(self.rect.width/2), self.rect.y+40, 20, (45, 50, 30))
+            text.render(display, "reloading", self.rect.x+(screen_width/2), self.rect.y+100, 20, (45, 50, 30))
         elif self.reloading == False:
             text.render(display, ("bullets: "+str(self.bullet_counter)),
-                        self.rect.x+(self.rect.width/2), self.rect.y+40, 20, (45, 50, 30))
+                        self.rect.x+(screen_width/2), self.rect.y+100, 20, (45, 50, 30))
 
     def reload(self,display,ctime):
         screen_width, screen_height = display.get_size()
@@ -209,7 +209,7 @@ class Gunner(BasePlayer):
                 self.bullet_counter = 6
         text = Text()
         if self.reloading == True:
-            text.render(display, "reloading", screen_width/2, screen_height/2+40, 20, (45, 50, 30))
+            text.render(display, "reloading", self.rect.x+(screen_width/2), self.rect.y+100, 20, (45, 50, 30))
         elif self.reloading == False:
             text.render(display, ("bullets: "+str(self.bullet_counter)),
                         screen_width/2, screen_height/2+40, 20, (45, 50, 30)) 
@@ -229,7 +229,7 @@ class Knight(BasePlayer):
         self.swing_current_cooldown=self.swing_timer_max
         self.swing_cooldown=self.swing_timer_max
         self.knockback=10
-        self.damage=5
+        self.damage=100
         self.sword_length=20
         self.swing_distance=1.2
     def draw_marker(self,draw_surface,swing_timer,swing_timer_max):
